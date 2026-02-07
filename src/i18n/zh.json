@@ -1,0 +1,27 @@
+{
+  "common": {
+    "title": "NEGA",
+    "description": "您的 Native English Grammar Assistant",
+    "startSession": "开始对话",
+    "endSession": "结束对话",
+    "listening": "正在倾听...",
+    "waiting": "等待语音...",
+    "thinking": "正在思考...",
+    "speaking": "正在说话...",
+    "interrupting": "点击中断",
+    "settings": "设置",
+    "subtitles": "字幕",
+    "theme": "主题",
+    "language": "语言",
+    "dark": "深色",
+    "light": "浅色",
+    "system": "系统"
+  },
+  "home": {
+    "welcome": "欢迎使用 NEGA",
+    "subtitle": "通过自然对话提升您的英语水平",
+    "feature1": "实时语法检查",
+    "feature2": "地道口语表达",
+    "feature3": "智能语音交互"
+  }
+}

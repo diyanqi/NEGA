@@ -1,0 +1,27 @@
+{
+  "common": {
+    "title": "NEGA",
+    "description": "your Native English Grammar Assistant",
+    "startSession": "Start Session",
+    "endSession": "End Session",
+    "listening": "Listening...",
+    "waiting": "Waiting for voice...",
+    "thinking": "Thinking...",
+    "speaking": "Speaking...",
+    "interrupting": "Click to Interrupt",
+    "settings": "Settings",
+    "subtitles": "Subtitles",
+    "theme": "Theme",
+    "language": "Language",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "home": {
+    "welcome": "Welcome to NEGA",
+    "subtitle": "Improve your English through natural conversation",
+    "feature1": "Real-time Grammar Check",
+    "feature2": "Natural Expressions",
+    "feature3": "Intelligent Voice Interaction"
+  }
+}
