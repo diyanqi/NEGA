@@ -1,0 +1,40 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#0066FF" opacity="0.1"/>
+  <circle cx="100" cy="100" r="90" fill="#0066FF" opacity="0.05"/>
+  
+  <!-- Main gradient -->
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA24C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Speech bubble with checkmark (grammar check) -->
+  <g>
+    <!-- Speech bubble -->
+    <path d="M 45 55 Q 40 55 40 60 L 40 120 Q 40 125 45 125 L 130 125 Q 135 125 135 120 L 135 75 L 145 95 L 135 100 L 135 60 Q 135 55 130 55 Z" fill="url(#mainGradient)" stroke="none"/>
+    
+    <!-- Checkmark inside speech bubble -->
+    <g transform="translate(55, 75)">
+      <path d="M 8 18 L 18 28 L 38 8" stroke="#FFFFFF" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+  
+  <!-- Sound wave / spoken element -->
+  <g>
+    <circle cx="100" cy="168" r="4" fill="url(#accentGradient)"/>
+    <path d="M 85 155 Q 95 165 100 168 Q 105 165 115 155" stroke="url(#accentGradient)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <g opacity="0.3">
+    <circle cx="155" cy="65" r="3" fill="url(#mainGradient)"/>
+    <circle cx="160" cy="85" r="2.5" fill="url(#accentGradient)"/>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+<!-- NEGA Logo - Simple Version with Text -->
+<svg viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Logo Icon -->
+  <circle cx="35" cy="40" r="30" fill="#0066FF" opacity="0.1"/>
+  <g>
+    <!-- Speech bubble with checkmark -->
+    <path d="M 15 20 Q 10 20 10 25 L 10 55 Q 10 60 15 60 L 50 60 Q 55 60 55 55 L 55 35 L 65 50 L 55 50 L 55 25 Q 55 20 50 20 Z" fill="url(#textGradient)"/>
+    
+    <!-- Checkmark -->
+    <g transform="translate(20, 30)">
+      <path d="M 4 10 L 10 16 L 20 6" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+  
+  <!-- Text: NEGA -->
+  <text x="80" y="55" font-family="Arial, sans-serif" font-size="44" font-weight="bold" fill="url(#textGradient)">NEGA</text>
+</svg>

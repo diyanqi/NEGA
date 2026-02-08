@@ -1,0 +1,18 @@
+# NEGA - Your Native English Grammar Assistant
+# Robots.txt for SEO optimization
+
+User-agent: *
+Allow: /
+Allow: /en
+Allow: /zh
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /admin/
+
+# Crawl delay (in seconds)
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: https://negaapp.com/sitemap.xml
+Sitemap: https://negaapp.com/sitemap-en.xml
+Sitemap: https://negaapp.com/sitemap-zh.xml

@@ -21,11 +21,11 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini-tts',
+        model: 'tts-1',
         input: text,
-        voice: voice || 'alloy',
+        voice: voice || 'en-US-AndrewMultilingualNeural',
         response_format: 'mp3',
-        speed: 1.2,
+        speed: 1.1,
       }),
     });
 
