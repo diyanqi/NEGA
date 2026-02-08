@@ -31,6 +31,7 @@ import {
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { useI18n } from "@/i18n/context";
 import { useTheme } from "next-themes";
+import { isBrowserSpeechRecognitionSupported, createLiveSpeechRecognition } from "@/lib/browser-speech";
 
 export default function VoiceChat({
   onSwitchToChat,
@@ -69,6 +70,9 @@ export default function VoiceChat({
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
+  const [useBrowserRecognition, setUseBrowserRecognition] = useState(false);
+  const browserRecognitionRef = useRef<any>(null);
+  const browserTranscriptRef = useRef<string>('');
 
   useEffect(() => {
     const unsubscribes = springLevels.map((spring, i) =>
@@ -111,6 +115,13 @@ export default function VoiceChat({
 
   useEffect(() => {
     setMounted(true);
+    // Check if browser supports speech recognition
+    if (isBrowserSpeechRecognitionSupported()) {
+      console.debug('Browser Speech Recognition is supported');
+      setUseBrowserRecognition(true);
+    } else {
+      console.debug('Browser Speech Recognition not supported, will use remote API');
+    }
   }, []);
 
   useEffect(() => {
@@ -203,6 +214,35 @@ export default function VoiceChat({
     )({ sampleRate: 16000 });
     audioContextRef.current = audioContext;
     const source = audioContext.createMediaStreamSource(stream);
+
+    // Setup browser speech recognition if supported
+    if (useBrowserRecognition && !browserRecognitionRef.current) {
+      try {
+        browserRecognitionRef.current = createLiveSpeechRecognition(
+          (result) => {
+            if (result.isFinal) {
+              browserTranscriptRef.current += result.text + ' ';
+              console.debug('Browser recognition (final):', result.text);
+            }
+          },
+          (error) => {
+            console.warn('Browser recognition error:', error);
+            // Don't disable it entirely, just log the error
+          },
+          {
+            lang: 'en-US',
+            continuous: true,
+            interimResults: true,
+          }
+        );
+        // Start browser recognition
+        browserRecognitionRef.current.start();
+        console.debug('Browser speech recognition started');
+      } catch (err) {
+        console.error('Failed to setup browser recognition:', err);
+        setUseBrowserRecognition(false);
+      }
+    }
 
     // Use a ScriptProcessor or AudioWorklet for raw data analysis
     // For wider compatibility in this demo, we'll stick to Analyser + local sampling
@@ -365,6 +405,16 @@ export default function VoiceChat({
       audioPlayerRef.current.pause();
       audioPlayerRef.current.src = "";
     }
+    // Cleanup browser recognition
+    if (browserRecognitionRef.current) {
+      try {
+        browserRecognitionRef.current.abort();
+      } catch (e) {
+        // Ignore errors on abort
+      }
+      browserRecognitionRef.current = null;
+    }
+    browserTranscriptRef.current = '';
     // Cleanup queues and revoke URLs
     ttsAudioQueueRef.current.forEach((item) => URL.revokeObjectURL(item.url));
     ttsAudioQueueRef.current = [];
@@ -418,39 +468,53 @@ export default function VoiceChat({
     isRecordingRef.current = false;
   };
 
-  const processVoiceInput = async (audioBlob: Blob) => {
-    if (audioBlob.size === 0) {
+  const processVoiceInput = async (audioBlob: Blob, browserText?: string) => {
+    if (audioBlob.size === 0 && !browserText) {
       console.warn("Empty audio blob received");
       return;
     }
 
     console.debug(
-      `Processing voice input: size=${audioBlob.size}, type=${audioBlob.type}`,
+      `Processing voice input: size=${audioBlob.size}, type=${audioBlob.type}, browserText=${browserText}`,
     );
     setMode("processing");
     setCurrentSubtitle("");
 
     try {
-      // audioBlob is already 16kHz WAV from handleVADRecordingComplete
-      const formData = new FormData();
-      formData.append("file", audioBlob, "rec.wav");
-      formData.append("mimeType", "audio/wav");
-
-      // 1. Transcribe
-      console.debug("Sending VAD-extracted WAV (16kHz) to /api/transcribe...");
-      const transRes = await fetch("/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-      if (!transRes.ok) {
-        const errData = await transRes.json();
-        console.error("Transcription API error:", errData);
-        throw new Error(
-          `Transcription failed: ${errData.error || transRes.statusText}`,
-        );
+      let text = browserText || '';
+      
+      // If browser recognition was used and provided text, use it directly
+      if (!text && useBrowserRecognition && browserTranscriptRef.current) {
+        text = browserTranscriptRef.current;
+        console.debug("Using browser recognition result:", text);
+        browserTranscriptRef.current = ''; // Reset
       }
-      const { text } = await transRes.json();
-      console.debug("Transcription result:", text);
+      
+      // Otherwise, fall back to remote API
+      if (!text) {
+        // audioBlob is already 16kHz WAV from handleVADRecordingComplete
+        const formData = new FormData();
+        formData.append("file", audioBlob, "rec.wav");
+        formData.append("mimeType", "audio/wav");
+
+        // 1. Transcribe
+        console.debug("Browser recognition not available/failed, using remote API...");
+        const transRes = await fetch("/api/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        if (!transRes.ok) {
+          const errData = await transRes.json();
+          console.error("Transcription API error:", errData);
+          throw new Error(
+            `Transcription failed: ${errData.error || transRes.statusText}`,
+          );
+        }
+        const result = await transRes.json();
+        text = result.text;
+        console.debug("Remote transcription result:", text);
+      }
+      
       setCurrentSubtitle(text);
 
       if (!text || text.trim().length === 0) {

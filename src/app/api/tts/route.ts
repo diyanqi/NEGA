@@ -21,9 +21,9 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'tts-1',
+        model: 'gpt-4o-mini-tts',
         input: text,
-        voice: voice || 'en-US-SteffanNeural',
+        voice: voice || 'alloy',
         response_format: 'mp3',
         speed: 1.2,
       }),

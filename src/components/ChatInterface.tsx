@@ -26,6 +26,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isBrowserSpeechRecognitionSupported, createLiveSpeechRecognition } from '@/lib/browser-speech';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -40,15 +41,28 @@ export default function ChatInterface({ onSwitchToVoice }: { onSwitchToVoice?: (
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [useBrowserRecognition, setUseBrowserRecognition] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const browserRecognitionRef = useRef<any>(null);
+  const browserTranscriptRef = useRef<string>('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    // Check if browser supports speech recognition
+    if (isBrowserSpeechRecognitionSupported()) {
+      console.debug('Browser Speech Recognition is supported');
+      setUseBrowserRecognition(true);
+    } else {
+      console.debug('Browser Speech Recognition not supported, will use remote API');
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -87,6 +101,48 @@ export default function ChatInterface({ onSwitchToVoice }: { onSwitchToVoice?: (
 
   const startRecording = async () => {
     try {
+      // If browser supports live recognition, use it
+      if (useBrowserRecognition && !browserRecognitionRef.current) {
+        browserTranscriptRef.current = '';
+        browserRecognitionRef.current = createLiveSpeechRecognition(
+          (result) => {
+            if (result.isFinal) {
+              browserTranscriptRef.current += result.text + ' ';
+              console.debug('Browser recognition (final):', result.text);
+            } else {
+              // Update input with interim results for immediate feedback
+              const interim = result.text;
+              setInput(prev => {
+                // Remove previous interim result and add new one
+                const baseText = browserTranscriptRef.current;
+                return baseText + interim;
+              });
+            }
+          },
+          (error) => {
+            console.warn('Browser recognition error:', error);
+            // Fall back to recording for remote API
+          },
+          {
+            lang: 'en-US',
+            continuous: true,
+            interimResults: true,
+          }
+        );
+        
+        try {
+          browserRecognitionRef.current.start();
+          setIsRecording(true);
+          console.debug('Browser speech recognition started');
+          return; // Don't record audio if using browser recognition
+        } catch (err) {
+          console.error('Failed to start browser recognition:', err);
+          browserRecognitionRef.current = null;
+          // Continue with MediaRecorder fallback below
+        }
+      }
+
+      // Fallback: record audio for remote API transcription
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -109,6 +165,25 @@ export default function ChatInterface({ onSwitchToVoice }: { onSwitchToVoice?: (
   };
 
   const stopRecording = () => {
+    // Stop browser recognition if active
+    if (browserRecognitionRef.current) {
+      try {
+        browserRecognitionRef.current.stop();
+        // Use the final transcript
+        const finalText = browserTranscriptRef.current.trim();
+        if (finalText) {
+          setInput(prev => prev ? prev + ' ' + finalText : finalText);
+        }
+      } catch (err) {
+        console.error('Error stopping browser recognition:', err);
+      }
+      browserRecognitionRef.current = null;
+      browserTranscriptRef.current = '';
+      setIsRecording(false);
+      return;
+    }
+
+    // Stop MediaRecorder if active
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
@@ -117,11 +192,14 @@ export default function ChatInterface({ onSwitchToVoice }: { onSwitchToVoice?: (
   };
 
   const handleTranscribe = async (audioBlob: Blob) => {
+    // Only called when using MediaRecorder (fallback)
     setIsLoading(true);
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.webm');
+    formData.append('mimeType', audioBlob.type);
 
     try {
+      console.debug('Using remote API for transcription (browser recognition not used)');
       const res = await fetch('/api/transcribe', {
         method: 'POST',
         body: formData,

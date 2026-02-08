@@ -25,3 +25,11 @@ export function getRandomApiKey(envVarName: string = 'NVIDIA_API_KEY'): string {
   
   return key;
 }
+
+/**
+ * Retrieves a Cerebras API key using Round Robin rotation.
+ * Uses the CEREBRAS_API_KEY environment variable.
+ */
+export function getRandomApiKeyForCerebras(): string {
+  return getRandomApiKey('CEREBRAS_API_KEY');
+}
