@@ -21,7 +21,24 @@
     "limitNote": "Sign in for unlimited sessions. Guests are limited to 3 rounds.",
     "userAgreement": "User Agreement",
     "limitReached": "Daily limit reached for guests. Sign in for unlimited chats!",
-    "limitReachedSubtitle": "Keep the conversation going with a free account."
+    "limitReachedSubtitle": "Keep the conversation going with a free account.",
+    "voice": "Voice",
+    "course": "Course",
+    "adText": "Free High School Essay Grading @ InkCraft",
+    "visitInkCraft": "Visit InkCraft"
+  },
+  "courses": {
+    "street": "Street English",
+    "streetDesc": "Slang, AAVE & Authentic vibe",
+    "interview": "Job Interview",
+    "interviewDesc": "Professional & Formal coaching",
+    "travel": "Travel English",
+    "travelDesc": "Practical situational English"
+  },
+  "voices": {
+    "andrew": "Andrew (Male)",
+    "emma": "Emma (Female)",
+    "brian": "Brian (Deep)"
   },
   "home": {
     "welcome": "Welcome to NEGA",

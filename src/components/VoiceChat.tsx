@@ -27,6 +27,9 @@ import {
   Mic,
   MessageSquare,
   CheckCircle2,
+  ChevronDown,
+  GraduationCap,
+  Volume2,
 } from "lucide-react";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { useI18n } from "@/i18n/context";
@@ -58,6 +61,8 @@ export default function VoiceChat() {
   );
   const [audioLevel, setAudioLevel] = useState(0);
   const [isLimitReached, setIsLimitReached] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState("en-US-AndrewMultilingualNeural");
+  const [selectedCourse, setSelectedCourse] = useState("street");
 
   useEffect(() => {
     if (session) {
@@ -690,7 +695,7 @@ export default function VoiceChat() {
     const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, voice: selectedVoice }),
     });
     if (!res.ok) {
       const err = await res.text();
@@ -795,6 +800,7 @@ export default function VoiceChat() {
       body: JSON.stringify({
         messages: currentMessages,
         stream: true,
+        course: selectedCourse,
       }),
     });
 
@@ -929,19 +935,56 @@ export default function VoiceChat() {
 
       {!hasStarted ? (
         <div className="h-full w-full bg-background text-foreground flex flex-col items-center justify-center p-4 md:p-6 transition-colors duration-500 mesh-gradient relative">
-          <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20">
+          <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center z-20 gap-4">
             <motion.a
               href="https://www.inkcraft.cn"
               target="_blank"
               rel="noopener noreferrer"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2 group"
+              className="group relative flex items-center gap-3 bg-foreground/5 hover:bg-foreground/10 px-4 py-3 rounded-2xl backdrop-blur-xl border border-foreground/5 transition-all hover:scale-[1.05] shadow-sm overflow-hidden"
             >
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center transition-transform group-hover:scale-110">
-                <span className="text-background font-black text-sm">I</span>
+              {/* Shiny animated border/background */}
+              <motion.div
+                className="absolute inset-0 bg-linear-to-r from-transparent via-blue-400/20 to-transparent -skew-x-12"
+                animate={{
+                  left: ["-100%", "200%"],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatDelay: 1,
+                }}
+              />
+              <motion.div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10"
+                animate={{
+                  backgroundPosition: ["0% 0%", "200% 0%"],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+              
+              <div className="relative w-10 h-10 rounded-xl bg-foreground flex items-center justify-center transition-transform group-hover:rotate-12 shadow-lg z-10">
+                <span className="text-background font-black text-lg">I</span>
+                <motion.div
+                  className="absolute inset-x-0 bottom-0 h-1 bg-blue-500 rounded-full"
+                  animate={{ scaleX: [0, 1, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
               </div>
-              <span className="font-bold text-sm tracking-tight opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">InkCraft • 墨灵</span>
+              <div className="flex flex-col relative z-10">
+                <span className="font-black text-sm tracking-tight text-foreground/90 group-hover:text-blue-500 transition-colors">
+                  {dict.common.adText}
+                </span>
+                <span className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  {dict.common.visitInkCraft} <motion.span animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>🚀</motion.span>
+                </span>
+              </div>
             </motion.a>
           </div>
 
@@ -1043,12 +1086,86 @@ export default function VoiceChat() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col items-center space-y-6 md:space-y-8 px-4"
+              className="flex flex-col items-center space-y-6 md:space-y-8 px-4 w-full max-w-lg mx-auto"
             >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+                <Dropdown 
+                  className="bg-background/90 backdrop-blur-3xl border border-foreground/10 rounded-[1.5rem] shadow-2xl p-2 min-w-[240px]"
+                >
+                  <DropdownTrigger>
+                    <Button 
+                      variant="flat" 
+                      className="h-16 bg-foreground/5 hover:bg-foreground/10 border border-foreground/5 rounded-2xl font-bold flex justify-between px-6 transition-all hover:scale-[1.02]"
+                      startContent={<GraduationCap size={24} className="text-blue-500 mr-1" />}
+                      endContent={<ChevronDown size={16} className="opacity-30" />}
+                    >
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="text-[9px] uppercase tracking-[0.2em] opacity-40 font-black">{dict.common.course}</span>
+                        <span className="text-sm tracking-tight">{(dict.courses as any)[selectedCourse]}</span>
+                      </div>
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu 
+                    aria-label="Course selection"
+                    onAction={(key) => setSelectedCourse(key as string)}
+                    selectedKeys={[selectedCourse]}
+                    selectionMode="single"
+                    className="p-1"
+                    itemClasses={{
+                      base: "rounded-xl py-3 px-4 gap-3 data-[hover=true]:bg-foreground/5 transition-all",
+                      title: "font-bold text-sm",
+                      description: "text-[11px] opacity-50 font-medium",
+                      selectedIcon: "text-blue-500",
+                    }}
+                  >
+                    <DropdownItem key="street" description={dict.courses.streetDesc}>{dict.courses.street}</DropdownItem>
+                    <DropdownItem key="interview" description={dict.courses.interviewDesc}>{dict.courses.interview}</DropdownItem>
+                    <DropdownItem key="travel" description={dict.courses.travelDesc}>{dict.courses.travel}</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+
+                <Dropdown 
+                  className="bg-background/90 backdrop-blur-3xl border border-foreground/10 rounded-[1.5rem] shadow-2xl p-2 min-w-[240px]"
+                >
+                  <DropdownTrigger>
+                    <Button 
+                      variant="flat" 
+                      className="h-16 bg-foreground/5 hover:bg-foreground/10 border border-foreground/5 rounded-2xl font-bold flex justify-between px-6 transition-all hover:scale-[1.02]"
+                      startContent={<Volume2 size={24} className="text-purple-500 mr-1" />}
+                      endContent={<ChevronDown size={16} className="opacity-30" />}
+                    >
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="text-[9px] uppercase tracking-[0.2em] opacity-40 font-black">{dict.common.voice}</span>
+                        <span className="text-sm tracking-tight text-left">
+                          {selectedVoice === "en-US-AndrewMultilingualNeural" ? dict.voices.andrew : 
+                           selectedVoice === "en-US-AvaNeural" ? dict.voices.emma : dict.voices.brian}
+                        </span>
+                      </div>
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu 
+                    aria-label="Voice selection"
+                    onAction={(key) => setSelectedVoice(key as string)}
+                    selectedKeys={[selectedVoice]}
+                    selectionMode="single"
+                    className="p-1"
+                    itemClasses={{
+                      base: "rounded-xl py-3 px-4 data-[hover=true]:bg-foreground/5 transition-all",
+                      title: "font-bold text-sm",
+                      selectedIcon: "text-purple-500",
+                    }}
+                  >
+                    <DropdownItem key="en-US-AndrewMultilingualNeural">{dict.voices.andrew}</DropdownItem>
+                    <DropdownItem key="en-US-AvaNeural">{dict.voices.emma}</DropdownItem>
+                    <DropdownItem key="en-GB-SoniaNeural">{dict.voices.brian}</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+
               <Button
                 size="lg"
                 radius="full"
-                className="group relative w-full max-w-md h-16 md:h-20 bg-foreground text-background text-xl md:text-2xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(255,255,255,0.05)]"
+                className="group relative w-full h-16 md:h-20 bg-foreground text-background text-xl md:text-2xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_rgba(255,255,255,0.05)]"
                 onPress={startSession}
               >
                 <motion.div

@@ -21,7 +21,24 @@
     "limitNote": "登录以享受无限对话。访客每场对话限 3 轮。",
     "userAgreement": "用户协议",
     "limitReached": "访客对话次数已达上限（3轮）。请登录以享受无限次数的口语教练！",
-    "limitReachedSubtitle": "登录账号，让对话继续。"
+    "limitReachedSubtitle": "登录账号，让对话继续。",
+    "voice": "语音选择",
+    "course": "训练课程",
+    "adText": "免费批改高考、应试作文 @ 墨灵 InkCraft",
+    "visitInkCraft": "访问墨灵主站"
+  },
+  "courses": {
+    "street": "街头美语",
+    "streetDesc": "俚语、非裔美语与地道表达",
+    "interview": "职场面试",
+    "interviewDesc": "专业、正式的职场面试辅导",
+    "travel": "旅游英语",
+    "travelDesc": "实用的旅游情景口语练习"
+  },
+  "voices": {
+    "andrew": "安德鲁 (男声)",
+    "emma": "艾玛 (女声)",
+    "brian": "布莱恩 (深沉)"
   },
   "home": {
     "welcome": "欢迎使用 NEGA",
